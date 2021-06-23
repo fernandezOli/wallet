@@ -1,5 +1,11 @@
+html {
+  background-color: #d8d8d8;
+}
+
 .App {
-  text-align: center;
+  /*text-align: center;*/
+  background-color: #d8d8d8;
+  color: #000;
 }
 
 .App-logo {
@@ -13,19 +19,21 @@
   }
 }
 
+/*
 .App-header {
-  background-color: #282c34;
+  background-color: #d8d8d8;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-size: calc(5px + 2vmin);
+  color: #000;
 }
+*/
 
 .App-link {
-  color: #61dafb;
+  color: #61dafb8c;
 }
 
 @keyframes App-logo-spin {
@@ -33,6 +41,112 @@
     transform: rotate(0deg);
   }
   to {
+    transform: rotate(360deg);
+  }
+}
+
+.main {
+  padding: 5rem 0;
+  background-color: #fff;
+  color: #000;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /*justify-content: center;
+  align-items: center;*/
+  margin: 200px 300px 50px 300px; /* margin-top, margin-right, margin-bottom et margin-left*/
+  padding: 20px;
+}
+
+#connect {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+#connect > .flex-item {
+	flex: auto;
+  /*align-items: right;
+  justify-content: right;*/
+  text-align: left;
+}
+
+#connect > .cnx-item {
+	flex: none;
+  display: flex;
+  white-space: nowrap;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+  border: 1px solid;
+}
+
+#labelBC {
+  font-size: 20px;
+}
+
+#connect > .raw-item {
+	flex: none;
+  display: flex;
+  white-space: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#web3Btn {
+  font-size: 20px;
+  padding: 20px 50px;
+  cursor: pointer;
+}
+
+#labelAdr {
+  font-size: 20px;
+}
+
+input[type="text"] {
+  margin-left: 50px;
+}
+
+.sendBtn {
+  font-size: 14px;
+  padding: 5px 40px;
+  cursor: pointer;
+}
+
+.lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  margin: 8px;
+  border: 8px solid #00f;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #00f transparent;
+}
+
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
     transform: rotate(360deg);
   }
 }
