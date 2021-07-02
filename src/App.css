@@ -104,8 +104,16 @@ html {
   font-size: 20px;
 }
 
+p {
+  font-size: 14px;
+}
+
 input[type="text"] {
-  margin-left: 50px;
+  margin-left: 60px;
+}
+
+#inputContract {
+  margin-left: 15px;
 }
 
 .sendBtn {

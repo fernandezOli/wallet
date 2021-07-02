@@ -4,6 +4,8 @@ import { useCallback, useState, useEffect } from 'react'
 import './App.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import abiInterface from "./abi.json";
+//import erc20Interface from "./contract.adr";
 
 import Web3 from 'web3'
 
@@ -16,9 +18,17 @@ function App() {
   const [linkAccount, setLinkAccount] = useState("")
   const [balanceValue, setBalanceValue] = useState(0)
   const [value, setValue] = useState(0)
+  const [addressSend, sendAddress] = useState("")
   const [txHash, setTxHash] = useState("")
   const [isMined, setIsMined] = useState(false)
-  const [addressSend, sendAddress] = useState("")
+  const [valueEdu, setValueEdu] = useState(0)
+  const [addressSendEdu, sendAddressEdu] = useState("")
+  const [tokenName, setTokenName] = useState("")
+  const [balanceEduValue, setBalanceEduValue] = useState(0)
+  //const [erc20Interface, contractAddressERC20] = useState("")
+
+  var contract = null;
+  var erc20Interface = "0xC1eD9763170607bbd0961ce57a3B0A1022187834";
 
   useEffect(() => {
     connectToWeb3AtStartup()
@@ -50,28 +60,30 @@ function App() {
       draggable: true,
       progress: undefined,
       });
+    }
+
+  function initContract() {
+    // Chargement du contract
+    const web3 = new Web3(Web3.givenProvider);
+    const myContract = new web3.eth.Contract(
+      abiInterface,
+      "0xC1eD9763170607bbd0961ce57a3B0A1022187834"
+    );
+    contract = myContract;
+
+    contract.methods.name().call({from: idAccount}).then((result) => {
+      setTokenName(result);
+    }).catch((error) => {
+      console.error(error);
+    });
+
+    contract.methods.balanceOf(idAccount).call({from: idAccount}).then((result) => {
+      console.log(result);
+      setBalanceEduValue(parseFloat(web3.utils.fromWei(result, "ether")).toFixed(2));
+    }).catch((error) => {
+      console.error(error);
+    });
   }
-
-  const connectToWeb3AtStartup = useCallback(
-    async () => {
-      if(window.ethereum) {
-        try {
-          const web3 = new Web3(Web3.givenProvider)
-
-          const accounts = await web3.eth.getAccounts()
-          if (accounts.length !== 0) {
-            getInfoAccount()
-            setIsConnectedWeb3(true)
-          }
-
-        } catch (err) {
-          console.log(err)
-        }
-      } else {
-        alert("Install Metamask")
-      }
-    },
-  )
 
   const getInfoAccount = useCallback(
   async () => {
@@ -115,16 +127,38 @@ function App() {
           setLinkAccount("")
       }
 
-      const value = await web3.eth.getBalance(accounts[0])
-      setBalanceValue(parseFloat(web3.utils.fromWei(value, "ether")).toFixed(2))
+      const balance = await web3.eth.getBalance(accounts[0])
+      setBalanceValue(parseFloat(web3.utils.fromWei(balance, "ether")).toFixed(2))
 
     } catch (err) {
       console.log(err)
     }
-  }
+  },[idAccount]
   )
 
-  const connectToWeb3 = useCallback(
+  const connectToWeb3AtStartup = //useCallback(
+    async () => {
+      if(window.ethereum) {
+        try {
+          const web3 = new Web3(Web3.givenProvider)
+
+          const accounts = await web3.eth.getAccounts()
+          if (accounts.length !== 0) {
+            getInfoAccount()
+            setIsConnectedWeb3(true)
+            initContract(idAccount)
+          }
+
+        } catch (err) {
+          console.log(err)
+        }
+      } else {
+        alert("Install Metamask")
+      }
+    }
+  //)
+
+  const connectToWeb3 = //useCallback(
     async () => {
       if(window.ethereum) {
         try {
@@ -134,6 +168,7 @@ function App() {
           if (accounts.length !== 0) {
             getInfoAccount()
             setIsConnectedWeb3(true)
+            initContract(idAccount)
             toastSuccess()
           }
 
@@ -143,8 +178,8 @@ function App() {
       } else {
         alert("Install Metamask")
       }
-    },
-  )
+    }
+  //)
 
   const sendWei = useCallback(
     async () => {
@@ -176,7 +211,6 @@ function App() {
 
       let contractAddress = addressSend.toLowerCase();
       let accountAddress = accounts[0].toLowerCase();
-      // account and address is the same
       if (contractAddress === accountAddress) {
         toastError("address send and receive are the same !")
         return
@@ -196,6 +230,67 @@ function App() {
         toastSuccess()
       })  
     }, [value, addressSend]
+  )
+
+  const sendWeiEdu = useCallback(
+    async () => {
+      //isConnectedWeb3
+      if (addressSendEdu.length === 0) {
+        toastError("address cannot be empty !")
+        return
+      }
+
+      //console.log(value)
+      if (isNaN(valueEdu)) {
+        toastError("amount can only be number !")
+        return
+      }
+
+      if (!valueEdu) {
+        toastError("amount cannot be empty !")
+        return
+      }
+
+      if (parseFloat(valueEdu) === 0) {
+        toastError("amount cannot be 0 !")
+        return
+      }
+
+      const web3 = new Web3(Web3.givenProvider)
+
+      const accounts = await web3.eth.getAccounts()
+
+      let eduAddress = addressSendEdu.toLowerCase()
+      let accountAddress = accounts[0].toLowerCase()
+      //contractAddress
+      if (eduAddress === accountAddress) {
+        toastError("address send and receive are the same !")
+        return
+      }
+
+      const check = web3.utils.isAddress(eduAddress)
+      if (!check) {
+        toastError("invalid address")
+        return
+      }
+      let ETHamount = web3.utils.toWei(valueEdu, 'ether')
+
+      contract.methods.transfer(eduAddress, ETHamount).send({from: idAccount}).then((result) => {
+        //console.log(result);
+        setIsMined(true)
+        toastSuccess()
+      }).catch((error) => {
+        console.error(error);
+      });
+
+      contract.methods.balanceOf(idAccount).call({from: idAccount}).then((result) => {
+        //console.log(result);
+        setBalanceEduValue(parseFloat(web3.utils.fromWei(result, "ether")).toFixed(2));
+      }).catch((error) => {
+        console.error(error);
+      });
+
+    }, [valueEdu, addressSendEdu, idAccount, contract]
   )
 
   return (
@@ -227,7 +322,26 @@ function App() {
           <input type="text" id="inputAddress" onChange={e => sendAddress(e.target.value)} placeholder="address wallet to reveive fund 0x..." size="50" /></p>
           <p>Amount:
           <input type="text" onChange={e => setValue(e.target.value)} placeholder="amount ether ex: 10 or 0.001" size="30" /></p>
-          <p><button onClick={sendWei} className="sendBtn">Envoyer</button></p><p></p></div>
+          <p><button onClick={sendWei} className="sendBtn">Envoyer</button></p><p></p>
+        </div>
+
+        <div>
+        {
+          isConnectedWeb3 ? <div><p>Amount {tokenName}: {balanceEduValue}</p></div> : <div><p>Amount:</p></div>
+        }
+        </div>
+        <div>
+          <p>Address ERC20: 
+            <input type="text" id="inputContract" size="50" value={erc20Interface} disabled />
+          </p>
+          <p>Address: 
+            <input type="text" id="inputAddress" onChange={e => sendAddressEdu(e.target.value)} placeholder="address wallet to reveive fund 0x..." size="50" />
+          </p>
+          <p>Amount:
+            <input type="text" onChange={e => setValueEdu(e.target.value)} placeholder="amount Edu Token in ether ex: 10 or 0.001" size="30" />
+          </p>
+          <p><button onClick={sendWeiEdu} className="sendBtn">Envoyer</button></p><p></p>
+        </div>
 
         {
           (txHash && !isMined) 
